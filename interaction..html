@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python & ML Interactive Lab</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.5s ease;
+        }
+        
+        .ascii-art {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.5rem;
+            line-height: 1;
+            color: #667eea;
+        }
+        
+        @media (min-width: 768px) {
+            .ascii-art {
+                font-size: 0.65rem;
+            }
+        }
+        
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .spin-animation {
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-xl gradient-text">Python ML Lab</span>
+                </div>
+                <div class="hidden md:flex items-center gap-6">
+                    <a href="#intro" class="nav-link text-gray-600 hover:text-gray-900">Intro</a>
+                    <a href="#baseline" class="nav-link text-gray-600 hover:text-gray-900">Baselines</a>
+                    <a href="#roulette" class="nav-link text-gray-600 hover:text-gray-900">Roulette</a>
+                    <a href="#fingerprint" class="nav-link text-gray-600 hover:text-gray-900">Fingerprint</a>
+                    <a href="#chain" class="nav-link text-gray-600 hover:text-gray-900">Chain Overlap</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 text-white py-20">
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 bg-yellow-300 rounded-full blur-3xl"></div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <pre class="ascii-art text-white/80 mb-6 overflow-x-auto">
+██████╗ ██╗   ██╗████████╗██╗  ██╗ ██████╗ ███╗   ██╗    ██╗      █████╗ ██████╗ 
+██╔══██╗╚██╗ ██╔╝╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║    ██║     ██╔══██╗██╔══██╗
+██████╔╝ ╚████╔╝    ██║   ███████║██║   ██║██╔██╗ ██║    ██║     ███████║██████╔╝
+██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║    ██║     ██╔══██║██╔══██╗
+██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║    ███████╗██║  ██║██████╔╝
+╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝    ╚══════╝╚═╝  ╚═╝╚═════╝ 
+            </pre>
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">Interactive ML Concepts</h1>
+            <p class="text-xl md:text-2xl text-white/90 max-w-3xl mb-8">
+                From random baselines to roulette-driven mixing, 3D fingerprints, and chain overlap density — explore ML concepts interactively.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <a href="#baseline" class="bg-white text-indigo-600 px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition">
+                    Start Learning
+                </a>
+                <a href="#chain" class="border-2 border-white/50 text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/10 transition">
+                    Chain Overlap Demo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction Section -->
+    <section id="intro" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-indigo-600 font-semibold">GETTING STARTED</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-4">Introduction to Python & Jupyter</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    This interactive lab covers fundamental ML concepts through hands-on examples.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card-hover bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
+                    <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Markdown & Code Cells</h3>
+                    <p class="text-gray-600 text-sm">Jupyter notebooks combine documentation (Markdown) with executable code cells.</p>
+                </div>
+                
+                <div class="card-hover bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Interactive Execution</h3>
+                    <p class="text-gray-600 text-sm">Run code with Shift+Enter and see results immediately below each cell.</p>
+                </div>
+                
+                <div class="card-hover bg-gradient-to-br from-pink-50 to-orange-50 rounded-2xl p-6 border border-pink-100">
+                    <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-lg mb-2">Visualizations</h3>
+                    <p class="text-gray-600 text-sm">Create charts, plots, and interactive visualizations inline.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Random Baseline Section -->
+    <section id="baseline" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-indigo-600 font-semibold">STAGE 1</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-4">Random vs Majority Baseline</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Compare random guessing against always predicting the most common class.
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Controls -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-sm font-bold">1</span>
+                        Configure Experiment
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">True Labels (comma-separated 0s and 1s)</label>
+                            <input type="text" id="trueLabels" value="1,0,1,1,0,0,1,0,1,0" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent code-font">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Number of Runs: <span id="numRunsValue" class="font-bold text-indigo-600">200</span></label>
+                            <input type="range" id="numRuns" min="50" max="500" value="200" 
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        
+                        <button onclick="runBaselineExperiment()" 
+                            class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Run Experiment
+                        </button>
+                    </div>
+                    
+                    <!-- Results -->
+                    <div id="baselineResults" class="mt-6 space-y-4 hidden">
+                        <h4 class="font-semibold text-gray-700">Results</h4>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-indigo-50 rounded-xl p-4">
+                                <div class="text-sm text-indigo-600 font-medium">Mean Accuracy</div>
+                                <div id="meanAcc" class="text-2xl font-bold text-indigo-700">--</div>
+                            </div>
+                            <div class="bg-purple-50 rounded-xl p-4">
+                                <div class="text-sm text-purple-600 font-medium">Majority Baseline</div>
+                                <div id="majorityAcc" class="text-2xl font-bold text-purple-700">--</div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span>Random Baseline</span>
+                                <span id="randomBarValue" class="font-mono">0%</span>
+                            </div>
+                            <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="randomBar" class="h-full progress-bar" style="width: 0%"></div>
+                            </div>
+                            
+                            <div class="flex justify-between text-sm mt-3">
+                                <span>Majority Baseline</span>
+                                <span id="majorityBarValue" class="font-mono">0%</span>
+                            </div>
+                            <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="majorityBar" class="h-full bg-purple-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-gray-500 bg-gray-50 rounded-lg p-3">
+                            <span class="font-medium">Best:</span> <span id="bestAcc">--</span> | 
+                            <span class="font-medium">Worst:</span> <span id="worstAcc">--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <h3 class="font-bold text-lg mb-4">Accuracy Distribution</h3>
+                    <canvas id="baselineChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roulette Section -->
+    <section id="roulette" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-indigo-600 font-semibold">STAGE 2</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-4">Roulette-Driven Mixing</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    A roulette-style process mixing two discrete sets with hidden structure and bias.
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Roulette Wheel -->
+                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
+                    <h3 class="font-bold text-lg mb-4 text-center">🎰 Roulette Wheel</h3>
+                    
+                    <div class="relative w-48 h-48 mx-auto mb-6">
+                        <div id="rouletteWheel" class="w-full h-full rounded-full border-8 border-green-600 bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                            <div class="text-white text-4xl font-bold" id="rouletteResult">?</div>
+                        </div>
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 w-0 h-0 border-l-8 border-r-8 border-t-12 border-l-transparent border-r-transparent border-t-yellow-400"></div>
+                    </div>
+                    
+                    <div class="text-center space-y-3">
+                        <button onclick="spinRoulette()" 
+                            class="bg-green-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-green-700 transition">
+                            Spin!
+                        </button>
+                        <button onclick="runRouletteSequence()" 
+                            class="bg-emerald-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-emerald-700 transition">
+                            Run 100 Spins
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Sets Display -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+                    <h3 class="font-bold text-lg mb-4">Two Hidden Sets</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <div class="text-sm font-medium text-blue-600 mb-2">Set 0 (Low Numbers)</div>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-2 py-1 bg-blue-200 rounded text-blue-800 text-sm font-mono">1-10</span>
+                            </div>
+                            <div class="mt-2 text-2xl font-bold text-blue-700" id="set0Count">0</div>
+                            <div class="text-xs text-blue-500">draws</div>
+                        </div>
+                        
+                        <div class="bg-orange-50 rounded-xl p-4">
+                            <div class="text-sm font-medium text-orange-600 mb-2">Set 1 (High Numbers)</div>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="px-2 py-1 bg-orange-200 rounded text-orange-800 text-sm font-mono">101-110</span>
+                            </div>
+                            <div class="mt-2 text-2xl font-bold text-orange-700" id="set1Count">0</div>
+                            <div class="text-xs text-orange-500">draws</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">Target P(set1):</span> 18/37 ≈ 0.486
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            <span class="font-medium">Empirical P(set1):</span> <span id="empiricalP">--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sequence Output -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
+                    <h3 class="font-bold text-lg mb-4">Recent Outputs</h3>
+                    <div id="rouletteOutputs" class="h-64 overflow-y-auto space-y-1 font-mono text-sm">
+                        <div class="text-gray-400 italic">Spin to see outputs...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Roulette Chart -->
+            <div class="mt-8 bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="font-bold text-lg mb-4">Distribution of Roulette Outputs</h3>
+                <canvas id="rouletteChart" height="150"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3D Fingerprint Section -->
+    <section id="fingerprint" class="py-16 bg-gradient-to-br from-gray-900 to-indigo-900 text-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-indigo-300 font-semibold">STAGE 3</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-4">3D Fingerprint Vector</h2>
+                <p class="text-gray-300 max-w-2xl mx-auto">
+                    Compress the entire experiment into three numbers: (avg_random, majority, P(set1))
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Vector Display -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <h3 class="font-bold text-lg mb-6">Fingerprint Vector</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center font-bold">v₁</div>
+                            <div class="flex-1">
+                                <div class="text-sm text-gray-300">Avg Random Accuracy</div>
+                                <div class="text-2xl font-bold" id="v1Value">0.501</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center font-bold">v₂</div>
+                            <div class="flex-1">
+                                <div class="text-sm text-gray-300">Majority Accuracy</div>
+                                <div class="text-2xl font-bold" id="v2Value">0.500</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center font-bold">v₃</div>
+                            <div class="flex-1">
+                                <div class="text-sm text-gray-300">P(set1)</div>
+                                <div class="text-2xl font-bold" id="v3Value">0.501</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-black/30 rounded-xl font-mono text-sm">
+                        <div class="text-gray-400">// Computed values</div>
+                        <div class="mt-2">||v|| (norm) = <span id="normValue" class="text-green-400">0.867</span></div>
+                        <div>log₁₀(||v||) = <span id="log10Value" class="text-yellow-400">-0.0618</span></div>
+                        <div>ln(||v||) = <span id="lnValue" class="text-blue-400">-0.1424</span></div>
+                    </div>
+                    
+                    <button onclick="updateFingerprint()" 
+                        class="mt-4 w-full bg-gradient-to-r from-indigo-500 to-purple-500 py-3 rounded-xl font-semibold hover:opacity-90 transition">
+                        Update from Experiments
+                    </button>
+                </div>
+                
+                <!-- 3D Visualization (2D projection) -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <h3 class="font-bold text-lg mb-4">Vector Visualization (2D Projection)</h3>
+                    <canvas id="fingerprintChart" height="300"></canvas>
+                    <p class="text-xs text-gray-400 mt-2 text-center">
+                        Triangle = your experiment fingerprint | Circles = random comparison points
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chain Overlap Section -->
+    <section id="chain" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <span class="text-indigo-600 font-semibold">ADVANCED</span>
+                <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-4">Chain Overlap & Matter Density</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Custom metrics measuring training path coherence — overlap (cosine similarity) vs matter (orthogonal component).
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Explanation -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <h3 class="font-bold text-lg mb-4">What is Chain Overlap?</h3>
+                    
+                    <div class="space-y-4 text-gray-600">
+                        <p>
+                            <strong class="text-indigo-600">Chain Overlap Density</strong> measures the average 
+                            cosine similarity between consecutive weight vectors during training:
+                        </p>
+                        
+                        <div class="bg-indigo-50 p-4 rounded-xl font-mono text-sm">
+                            overlap = avg(cos(θ)) between w[t] and w[t+1]
+                        </div>
+                        
+                        <p>
+                            <strong class="text-purple-600">Chain Matter Density</strong> is its "polar opposite" — 
+                            the average sine of the angle:
+                        </p>
+                        
+                        <div class="bg-purple-50 p-4 rounded-xl font-mono text-sm">
+                            matter = avg(sin(θ)) between w[t] and w[t+1]
+                        </div>
+                        
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>High overlap (≈1)</strong>: Coherent training, updates align well</li>
+                            <li><strong>High matter</strong>: More off-axis movement, possibly noisy influence</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Interactive Demo -->
+                <div class="bg-white rounded-2xl p-6 shadow-lg">
+                    <h3 class="font-bold text-lg mb-4">Interactive Demo</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Label Noise Fraction: <span id="noiseValue" class="font-bold text-indigo-600">0.25</span>
+                            </label>
+                            <input type="range" id="noiseSlider" min="0" max="50" value="25" step="5"
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                oninput="document.getElementById('noiseValue').textContent = (this.value/100).toFixed(2)">
+                        </div>
+                        
+                        <button onclick="runChainExperiment()" 
+                            class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">
+                            Run Chain Analysis
+                        </button>
+                        
+                        <div id="chainResults" class="space-y-3 hidden">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-indigo-50 rounded-xl p-4 text-center">
+                                    <div class="text-sm text-indigo-600">Overlap</div>
+                                    <div id="overlapValue" class="text-2xl font-bold text-indigo-700">--</div>
+                                </div>
+                                <div class="bg-purple-50 rounded-xl p-4 text-center">
+                                    <div class="text-sm text-purple-600">Matter</div>
+                                    <div id="matterValue" class="text-2xl font-bold text-purple-700">--</div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-green-50 rounded-xl p-4">
+                                <div class="text-sm text-green-600">Reversal Strength (α)</div>
+                                <div id="alphaValue" class="text-xl font-bold text-green-700">--</div>
+                                <div class="text-xs text-green-500 mt-1">
+                                    Higher matter → stronger reversal toward clean weights
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- MSE Chart -->
+            <div class="mt-8 bg-white rounded-2xl p-6 shadow-lg">
+                <h3 class="font-bold text-lg mb-4">Effect of Label Noise on Model Error</h3>
+                <canvas id="mseChart" height="200"></canvas>
+                <p class="text-sm text-gray-500 mt-2 text-center">
+                    Lower is better. "Reverse-with-matter" uses chain metrics to partially undo noisy training.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Summary Section -->
+    <section class="py-16 bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-6">The Journey</h2>
+            
+            <div class="flex flex-wrap justify-center gap-3 mb-8">
+                <div class="bg-white/20 px-4 py-2 rounded-full text-sm">Data</div>
+                <div class="text-white/50">→</div>
+                <div class="bg-white/20 px-4 py-2 rounded-full text-sm">Baselines</div>
+                <div class="text-white/50">→</div>
+                <div class="bg-white/20 px-4 py-2 rounded-full text-sm">Roulette</div>
+                <div class="text-white/50">→</div>
+                <div class="bg-white/20 px-4 py-2 rounded-full text-sm">3D Fingerprint</div>
+                <div class="text-white/50">→</div>
+                <div class="bg-white/20 px-4 py-2 rounded-full text-sm">Chain Overlap</div>
+            </div>
+            
+            <p class="text-lg text-white/90 max-w-2xl mx-auto mb-8">
+                From a tiny classification toy to structured randomness, compressed fingerprints, 
+                and chain-overlap-based training analysis — all different projections of the same 
+                underlying concepts.
+            </p>
+            
+            <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 text-left font-mono text-sm max-w-2xl mx-auto">
+                <div class="text-indigo-200"># Final metrics from this session:</div>
+                <div class="mt-2">mean_random_accuracy = <span id="summaryMean" class="text-green-300">50.15</span>%</div>
+                <div>majority_accuracy = <span id="summaryMajority" class="text-yellow-300">50.00</span>%</div>
+                <div>p_set1 = <span id="summaryPSet1" class="text-blue-300">0.501</span></div>
+                <div>chain_overlap = <span id="summaryOverlap" class="text-pink-300">0.9999</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>Interactive Python ML Lab • Based on Jupyter Notebook concepts</p>
+            <p class="mt-2 text-sm">Built with ❤️ using Tailwind CSS & Chart.js</p>
+        </div>
+    </footer>
+
+    <script>
+        // Global state
+        let state = {
+            trueLabels: [1, 0, 1, 1, 0, 0, 1, 0, 1, 0],
+            accuracies: [],
+            meanAccuracy: 0,
+            majorityAccuracy: 0,
+            rouletteOutputs: [],
+            set0Count: 0,
+            set1Count: 0,
+            fingerprint: { v1: 0.501, v2: 0.5, v3: 0.501 }
+        };
+
+        // Charts
+        let baselineChart, rouletteChart, fingerprintChart, mseChart;
+
+        // Initialize charts on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            updateNumRunsDisplay();
+        });
+
+        function initCharts() {
+            // Baseline histogram
+            const baselineCtx = document.getElementById('baselineChart').getContext('2d');
+            baselineChart = new Chart(baselineCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Frequency',
+                        data: [],
+                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Distribution of Random Baseline Accuracy' }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Accuracy (%)' }},
+                        y: { title: { display: true, text: 'Frequency' }, beginAtZero: true }
+                    }
+                }
+            });
+
+            // Roulette chart
+            const rouletteCtx = document.getElementById('rouletteChart').getContext('2d');
+            rouletteChart = new Chart(rouletteCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Set 0',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)'
+                    }, {
+                        label: 'Set 1',
+                        data: [],
+                        backgroundColor: 'rgba(249, 115, 22, 0.6)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: 'Roulette Output Distribution' }
+                    }
+                }
+            });
+
+            // Fingerprint scatter
+            const fpCtx = document.getElementById('fingerprintChart').getContext('2d');
+            fingerprintChart = new Chart(fpCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Random Points',
+                        data: Array.from({length: 25}, () => ({x: Math.random(), y: Math.random()})),
+                        backgroundColor: 'rgba(156, 163, 175, 0.5)',
+                        pointRadius: 6
+                    }, {
+                        label: 'Your Fingerprint',
+                        data: [{x: 0.501, y: 0.5}],
+                        backgroundColor: 'rgba(236, 72, 153, 1)',
+                        pointStyle: 'triangle',
+                        pointRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: 'v1 vs v2 (2D projection)' }
+                    },
+                    scales: {
+                        x: { min: 0, max: 1, title: { display: true, text: 'Avg Random Acc' }},
+                        y: { min: 0, max: 1, title: { display: true, text: 'Majority Acc' }}
+                    }
+                }
+            });
+
+            // MSE Chart
+            const mseCtx = document.getElementById('mseChart').getContext('2d');
+            mseChart = new Chart(mseCtx, {
+                type: 'line',
+                data: {
+                    labels: ['0%', '10%', '25%', '50%'],
+                    datasets: [{
+                        label: 'Clean',
+                        data: [0.006, 0.006, 0.006, 0.006],
+                        borderColor: 'rgba(34, 197, 94, 1)',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true
+                    }, {
+                        label: 'Noisy',
+                        data: [0.0005, 0.005, 0.024, 0.071],
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true
+                    }, {
+                        label: 'Reverse-with-matter',
+                        data: [0.0006, 0.005, 0.023, 0.063],
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: 'Per-Area MSE vs Noise Level' }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Label Noise Fraction' }},
+                        y: { title: { display: true, text: 'MSE' }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function updateNumRunsDisplay() {
+            document.getElementById('numRuns').addEventListener('input', function() {
+                document.getElementById('numRunsValue').textContent = this.value;
+            });
+        }
+
+        // Baseline experiment
+        function runBaselineExperiment() {
+            const labelsStr = document.getElementById('trueLabels').value;
+            state.trueLabels = labelsStr.split(',').map(x => parseInt(x.trim()));
+            const numRuns = parseInt(document.getElementById('numRuns').value);
+
+            // Run random baseline
+            state.accuracies = [];
+            for (let i = 0; i < numRuns; i++) {
+                const preds = state.trueLabels.map(() => Math.random() < 0.5 ? 0 : 1);
+                const correct = state.trueLabels.reduce((acc, t, idx) => acc + (t === preds[idx] ? 1 : 0), 0);
+                state.accuracies.push(correct / state.trueLabels.length);
+            }
+
+            // Calculate stats
+            state.meanAccuracy = state.accuracies.reduce((a, b) => a + b, 0) / state.accuracies.length;
+            const ones = state.trueLabels.filter(x => x === 1).length;
+            const zeros = state.trueLabels.length - ones;
+            state.majorityAccuracy = Math.max(ones, zeros) / state.trueLabels.length;
+
+            // Update UI
+            document.getElementById('baselineResults').classList.remove('hidden');
+            document.getElementById('meanAcc').textContent = (state.meanAccuracy * 100).toFixed(2) + '%';
+            document.getElementById('majorityAcc').textContent = (state.majorityAccuracy * 100).toFixed(2) + '%';
+            document.getElementById('bestAcc').textContent = (Math.max(...state.accuracies) * 100).toFixed(1) + '%';
+            document.getElementById('worstAcc').textContent = (Math.min(...state.accuracies) * 100).toFixed(1) + '%';
+
+            // Progress bars
+            document.getElementById('randomBar').style.width = (state.meanAccuracy * 100) + '%';
+            document.getElementById('randomBarValue').textContent = (state.meanAccuracy * 100).toFixed(1) + '%';
+            document.getElementById('majorityBar').style.width = (state.majorityAccuracy * 100) + '%';
+            document.getElementById('majorityBarValue').textContent = (state.majorityAccuracy * 100).toFixed(1) + '%';
+
+            // Update histogram
+            const bins = {};
+            for (let i = 0; i <= 10; i++) bins[i * 10] = 0;
+            state.accuracies.forEach(a => {
+                const bin = Math.round(a * 10) * 10;
+                bins[bin] = (bins[bin] || 0) + 1;
+            });
+
+            baselineChart.data.labels = Object.keys(bins).map(k => k + '%');
+            baselineChart.data.datasets[0].data = Object.values(bins);
+            baselineChart.update();
+
+            // Update fingerprint
+            state.fingerprint.v1 = state.meanAccuracy;
+            state.fingerprint.v2 = state.majorityAccuracy;
+            updateFingerprintDisplay();
+            
+            // Update summary
+            document.getElementById('summaryMean').textContent = (state.meanAccuracy * 100).toFixed(2);
+            document.getElementById('summaryMajority').textContent = (state.majorityAccuracy * 100).toFixed(2);
+        }
+
+        // Roulette functions
+        const P_ONE = 18 / 37;
+        const set0 = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        const set1 = [101, 102, 103, 104, 105, 106, 107, 108, 109, 110];
+
+        function spinRoulette() {
+            const wheel = document.getElementById('rouletteWheel');
+            wheel.classList.add('spin-animation');
+            
+            setTimeout(() => {
+                wheel.classList.remove('spin-animation');
+                
+                const setId = Math.random() < P_ONE ? 1 : 0;
+                const currentSet = setId === 0 ? set0 : set1;
+                const value = currentSet[Math.floor(Math.random() * currentSet.length)];
+                
+                state.rouletteOutputs.push({ value, setId });
+                if (setId === 0) state.set0Count++;
+                else state.set1Count++;
+                
+                document.getElementById('rouletteResult').textContent = value;
+                updateRouletteUI();
+            }, 500);
+        }
+
+        function runRouletteSequence() {
+            for (let i = 0; i < 100; i++) {
+                const setId = Math.random() < P_ONE ? 1 : 0;
+                const currentSet = setId === 0 ? set0 : set1;
+                const value = currentSet[Math.floor(Math.random() * currentSet.length)];
+                
+                state.rouletteOutputs.push({ value, setId });
+                if (setId === 0) state.set0Count++;
+                else state.set1Count++;
+            }
+            updateRouletteUI();
+        }
+
+        function updateRouletteUI() {
+            document.getElementById('set0Count').textContent = state.set0Count;
+            document.getElementById('set1Count').textContent = state.set1Count;
+            
+            const total = state.set0Count + state.set1Count;
+            const empiricalP = total > 0 ? (state.set1Count / total).toFixed(3) : '--';
+            document.getElementById('empiricalP').textContent = empiricalP;
+            
+            // Update outputs display
+            const outputsDiv = document.getElementById('rouletteOutputs');
+            const recentOutputs = state.rouletteOutputs.slice(-50).reverse();
+            outputsDiv.innerHTML = recentOutputs.map(o => 
+                `<div class="${o.setId === 0 ? 'text-blue-600' : 'text-orange-600'}">${o.value}</div>`
+            ).join('');
+            
+            // Update chart
+            const set0Counts = {};
+            const set1Counts = {};
+            set0.forEach(v => set0Counts[v] = 0);
+            set1.forEach(v => set1Counts[v] = 0);
+            
+            state.rouletteOutputs.forEach(o => {
+                if (o.setId === 0) set0Counts[o.value]++;
+                else set1Counts[o.value]++;
+            });
+            
+            rouletteChart.data.labels = [...set0.map(String), ...set1.map(String)];
+            rouletteChart.data.datasets[0].data = [...Object.values(set0Counts), ...Array(10).fill(0)];
+            rouletteChart.data.datasets[1].data = [...Array(10).fill(0), ...Object.values(set1Counts)];
+            rouletteChart.update();
+            
+            // Update fingerprint
+            if (total > 0) {
+                state.fingerprint.v3 = state.set1Count / total;
+                updateFingerprintDisplay();
+                document.getElementById('summaryPSet1').textContent = (state.set1Count / total).toFixed(3);
+            }
+        }
+
+        // Fingerprint functions
+        function updateFingerprint() {
+            updateFingerprintDisplay();
+        }
+
+        function updateFingerprintDisplay() {
+            const v1 = state.fingerprint.v1;
+            const v2 = state.fingerprint.v2;
+            const v3 = state.fingerprint.v3;
+            
+            document.getElementById('v1Value').textContent = v1.toFixed(3);
+            document.getElementById('v2Value').textContent = v2.toFixed(3);
+            document.getElementById('v3Value').textContent = v3.toFixed(3);
+            
+            const norm = Math.sqrt(v1*v1 + v2*v2 + v3*v3);
+            document.getElementById('normValue').textContent = norm.toFixed(3);
+            document.getElementById('log10Value').textContent = Math.log10(norm).toFixed(4);
+            document.getElementById('lnValue').textContent = Math.log(norm).toFixed(4);
+            
+            // Update scatter chart
+            fingerprintChart.data.datasets[1].data = [{x: v1, y: v2}];
+            fingerprintChart.update();
+        }
+
+        // Chain overlap experiment
+        function runChainExperiment() {
+            const noiseFraction = parseInt(document.getElementById('noiseSlider').value) / 100;
+            
+            // Simulate chain overlap and matter based on noise
+            // In reality this would come from actual weight histories
+            const baseOverlap = 0.9999;
+            const overlap = baseOverlap - (noiseFraction * 0.0002);
+            const matter = Math.sqrt(1 - overlap * overlap);
+            const alpha = Math.min(0.8, Math.max(0, 8 * matter));
+            
+            document.getElementById('chainResults').classList.remove('hidden');
+            document.getElementById('overlapValue').textContent = overlap.toFixed(6);
+            document.getElementById('matterValue').textContent = matter.toFixed(6);
+            document.getElementById('alphaValue').textContent = alpha.toFixed(4);
+            
+            document.getElementById('summaryOverlap').textContent = overlap.toFixed(4);
+            
+            // Update MSE chart with simulated data based on noise
+            const noiseLabels = ['0%', '10%', '25%', '50%'];
+            const cleanMSE = [0.006, 0.006, 0.006, 0.006];
+            const noisyMSE = [0.0005, 0.005, 0.024, 0.071];
+            const reverseMSE = [0.0006, 0.005, 0.023, 0.063];
+            
+            mseChart.data.datasets[0].data = cleanMSE;
+            mseChart.data.datasets[1].data = noisyMSE;
+            mseChart.data.datasets[2].data = reverseMSE;
+            mseChart.update();
+        }
+    </script>
+</body>
+</html>
