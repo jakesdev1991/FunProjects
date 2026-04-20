@@ -1,0 +1,21 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node metrics.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jakesdev1991/FunProjects.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jakesdev1991/FunProjects/issues"
+  },
+  "homepage": "https://github.com/jakesdev1991/FunProjects#readme"
+}

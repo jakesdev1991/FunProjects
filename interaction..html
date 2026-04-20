@@ -6,6 +6,7 @@
     <title>Python & ML Interactive Lab</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="metrics.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap');
         
@@ -878,12 +879,7 @@
         function runChainExperiment() {
             const noiseFraction = parseInt(document.getElementById('noiseSlider').value) / 100;
             
-            // Simulate chain overlap and matter based on noise
-            // In reality this would come from actual weight histories
-            const baseOverlap = 0.9999;
-            const overlap = baseOverlap - (noiseFraction * 0.0002);
-            const matter = Math.sqrt(1 - overlap * overlap);
-            const alpha = Math.min(0.8, Math.max(0, 8 * matter));
+            const { overlap, matter, alpha } = calculateChainMetrics(noiseFraction);
             
             document.getElementById('chainResults').classList.remove('hidden');
             document.getElementById('overlapValue').textContent = overlap.toFixed(6);
