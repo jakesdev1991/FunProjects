@@ -1,0 +1,20 @@
+name: Archive Validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Validate Archive
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check README exists
+        run: test -f README.md
+      
+      - name: Verify archive notice
+        run: grep -q "archived" README.md
